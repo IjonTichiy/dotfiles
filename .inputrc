@@ -1,0 +1,105 @@
+set meta-flag on
+set input-meta on
+set convert-meta off
+set output-meta on
+
+# Completed names which are symbolic links to
+# directories have a slash appended.
+set mark-symlinked-directories on
+set colored-stats On 
+set completion-ignore-case On 
+set completion-prefix-display-length 3 
+set mark-symlinked-directories On 
+set show-all-if-ambiguous On 
+set show-all-if-unmodified On 
+set visible-stats On
+
+$if mode=emacs
+
+    # defaults
+    # "\C-w":                 unix-word-rubout
+    # "\C-b":                 backward-char
+    # "\C-f":                 forward-char
+    # "\C-a":                 beginning-of-line
+    # "\C-e":                 end-of-line
+    # "\C-@":                 set-mark
+    # "\C-x\C-x":             exchange-point-and-mark
+    # "\C-h":                 backward-delete-char
+    # "\C-d":                 delete-char
+
+    # general
+
+    "\C-x\C-v":               display-shell-version
+    "\C-x\C-r":               re-read-init-file
+
+    "\C-x\C-u":               undo
+    "\C-g":                   abort
+
+    "\C-y":                   yank
+    "\e.":                    yank-last-arg
+    "\e\C-y":                 yank-nth-arg
+    "\ey":                    yank-pop
+
+    "\e[200~":                bracketed-paste-begin
+
+    "\C-]":                   character-search
+    "\e\C-]":                 character-search-backward
+
+    # io
+    "\C-j":                   accept-line
+    "\C-M":                   accept-line
+    "\c-x\c-e":               edit-and-execute-command
+
+
+    # line edit
+    "\eh":                    backward-delete-char
+
+    "\ew":                    backward-kill-word
+    "\eu":                    backward-kill-line
+
+    "\eb":                    kill-word
+    "\C-k":                   kill-line
+
+    # "\C-u":                 unix-line-discard
+
+    "\ec":                    capitalize-word
+    "\eu":                    upcase-word
+    "\el":                    downcase-word
+
+    "\e\"":                   delete-horizontal-space
+    "\C-xA":                  do-lowercase-version
+    "\C-t":                   transpose-chars
+    "\et":                    transpose-words
+
+    #navigation
+    "\C-f":                   forward-char
+    # "\C-F":                   forward-word
+    "\e[1;3C":              forward-word
+
+    "\C-b":                   backward-char
+    # "\C-B":                   backward-word
+    "\e[1;3D":              backward-word
+
+    "\ea":                    beginning-of-line
+    "\ee":                    end-of-line
+
+    "\ek":                    alias-expand-line
+
+    "\eOB":                   next-history
+    "\eOA":                   previous-history
+
+    "\C-n":                   history-search-forward
+    "\C-p":                   history-search-backward
+
+    "\e\C-i":                 dynamic-complete-history
+    "\e^":                    history-expand-line
+
+    "\en":                    non-incremental-forward-search-history
+    "\ep":                    non-incremental-reverse-search-history
+
+    "\e-":                    digit-argument
+
+    "\e*":                    insert-completions
+    "\e.":                    insert-last-argument
+
+$endif
