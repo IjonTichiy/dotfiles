@@ -1,1 +1,18 @@
-/home/user/.bash_alias
+# custom aliases 
+alias sudo='sudo'
+alias vim='vimx'  # for clipboard support
+alias python='python3'
+alias ipython='ipython3'  # python3 is superior
+alias pip='pip3' 
+
+alias key='sed -n l'
+
+
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+alias la='ls -a'
+alias ll='ls -l'
+alias lla='ls -la'
+alias git-ls='git ls-tree --full-tree -r --name-only HEAD'
