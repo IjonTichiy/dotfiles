@@ -1,6 +1,10 @@
 # custom aliases 
 alias sudo='sudo'
-alias vim='vimx'  # for clipboard support
+
+if has("unix")
+    alias vim='vimx'  # for clipboard support
+endif
+
 alias python='python3'
 alias ipython='ipython3'  # python3 is superior
 alias pip='pip3' 
