@@ -6,8 +6,8 @@ if [ -f /etc/bashrc ]; then
 fi
 
 # Get aliases 
-if [ -f ~/.bash_alias ]; then
-    . ~/.bash_alias
+if [ -f $BASH_ALIAS ]; then
+    . $BASH_ALIAS
 fi
 
 # User specific environment
@@ -17,24 +17,20 @@ then
 fi
 export PATH
 
-source ~/liquidprompt/liquidprompt
-
-# liquidprompt prefix to show running process in GNU screen window name
-LP_PS1_PREFIX="\[\\033k\\033\\\\\]"
-
 # fix non-KDE desktop
 export QT_QPA_PLATFORMTHEME=qt5ct
 
-export PAGER=/home/user/.local/bin/vimpager
+export XDG_CONFIG_DIR=~/.config
 
-if ! [[ "$PATH" =~ "/usr/local/pgsql/bin:" ]]
-then
-    PATH="/usr/local/pgsql/bin:$PATH"
-fi
+export VIMRC=~/.vimrc
+export VIM_FILETYPES=$XDG_CONFIG_DIR/vim/filetype.vim
+export VIM_PLUGINS=$XDG_CONFIG_DIR/vim/plugins.vim
+export VIM_HELPERS=$XDG_CONFIG_DIR/vim/helper.vim
+export BASHRC=~/.bashrc
+export BASH_ALIAS=$XDG_CONFIG_DIR/bash/bash_alias
 
 export PATH
 
-export PGDATA=/home/user/.local/postgres_data
+bind -f ~/.inputrc
 
-# custom completion for python virtualenvs
-source ~/.virtualenvs/activate-completion.bash
+# source ~/.venv/bin/activate

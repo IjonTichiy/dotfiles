@@ -2,8 +2,10 @@ altscreen on
 defbce on
 vbell off
 mousetrack on
+startup_message off
 
-escape ^Aa
+escape ^||
+bindkey ";j" command
 
 # navigating regions with Ctrl-arrows
 bindkey "^[[1;5D" focus left
