@@ -31,7 +31,7 @@ alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
 # -- Git
-alias git='git.exe'
+# alias git='git.exe'
 alias git-ls='git ls-tree --full-tree -r --name-only HEAD'
 alias gs='git status -sb'
 alias gd='git diff'

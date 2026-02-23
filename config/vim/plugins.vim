@@ -12,7 +12,7 @@
 "   bufExplorer     access open buffers with <leader>b
 "   comfortable-motion   smooth scrolling with <c-d> & <c-u>
 "   commentary      toggle comments with gc
-"   ctrlp           fuzzy file finder
+"   ctrlp           fuzzy file finder with <leader>p
 "   goyo            distraction-free writing
 "   NERDTree        file tree with <leader>nn
 "   netrw           network/file browser
@@ -28,6 +28,11 @@
 " Load plugins with pathogen
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let g:pluginpath = $XDG_CONFIG_HOME . '/vim/plugins'
+
+" Variables that must be set BEFORE plugins load
+let g:ctrlp_map = '<leader>p'
+let g:ctrlp_cmd = 'CtrlP'
+
 execute pathogen#infect(g:pluginpath . '/{}.vim')
 call pathogen#helptags()
 
@@ -55,6 +60,11 @@ nnoremap <silent> <C-d> :call comfortable_motion#flick(100)<CR>
 nnoremap <silent> <C-u> :call comfortable_motion#flick(-100)<CR>
 nnoremap <silent> <C-f> :call comfortable_motion#flick(200)<CR>
 nnoremap <silent> <C-b> :call comfortable_motion#flick(-200)<CR>
+
+
+" ctrlp
+"""""""""""""""""""""""""""""""""""""""
+" (g:ctrlp_map set above pathogen — must load before plugin init)
 
 
 " cope (quickfix navigation - built-in)
