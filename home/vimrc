@@ -100,7 +100,7 @@ nmap <M-k> mz:m-2<cr>`z
 map <leader>cd :cd %:p:h<cr>:pwd<cr>
 
 " Toggle paste mode on and off
-nmap <leader>pp :setlocal paste!<cr>
+nmap <leader>pt :setlocal paste!<cr>
 
 " Map <Space> to / (search)
 nmap <space> /
@@ -260,19 +260,32 @@ source $VIM_HELPERS
 " IMPORTANT: must come after loading plugins
 syntax enable
 
+" Tell base16-vim to use the terminal palette (colors 0-21 set by Xresources)
+let base16colorspace=256
+
 " Base16 Atelier Dune - matches the terminal Xresources palette
 if filereadable(expand(pluginpath . '/base16-vim.vim/colors/base16-atelier-dune.vim'))
     set background=dark
     colorscheme base16-atelier-dune
-
-    " Ensure visual selection is clearly visible
-    " base02 (#6e6b5e) on dark bg — warm grey band
-    hi Visual ctermbg=19 ctermfg=NONE guibg=#6e6b5e guifg=NONE
 else
     " Fallback
     colorscheme industry
-    hi Visual ctermbg=238 ctermfg=NONE
 endif
+
+" Transparent background — let the terminal paint the background color.
+" This is the key to vim and terminal looking identical.
+hi Normal       ctermbg=NONE guibg=NONE
+hi NonText      ctermbg=NONE guibg=NONE
+hi EndOfBuffer  ctermbg=NONE guibg=NONE
+hi LineNr       ctermbg=NONE guibg=NONE
+hi CursorLineNr ctermbg=NONE guibg=NONE
+hi SignColumn   ctermbg=NONE guibg=NONE
+hi FoldColumn   ctermbg=NONE guibg=NONE
+hi VertSplit    ctermbg=NONE guibg=NONE
+hi ColorColumn  ctermbg=18   guibg=#292824
+hi Visual       ctermbg=237  ctermfg=NONE guibg=#3a3835 guifg=NONE
+hi StatusLine   ctermbg=19   ctermfg=20   guibg=#6e6b5e guifg=#e8e4cf
+hi StatusLineNC ctermbg=18   ctermfg=20   guibg=#292824 guifg=#999580
 
 " Fix background color erase in screen/tmux
 set t_ut=

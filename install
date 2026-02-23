@@ -54,12 +54,14 @@ declare -A LINKS=(
     ["config/bash/bash_alias"]="$XDG_CONFIG_HOME/bash/bash_alias"
     ["config/python/pythonstartup.py"]="$XDG_CONFIG_HOME/python/pythonstartup.py"
     ["config/wget/wgetrc"]="$XDG_CONFIG_HOME/wget/wgetrc"
-    # Ready for your vim config later:
-    # ["home/vimrc"]="$HOME/.vimrc"
-    # ["config/vim/filetype.vim"]="$XDG_CONFIG_HOME/vim/filetype.vim"
-    # ["config/vim/plugins.vim"]="$XDG_CONFIG_HOME/vim/plugins.vim"
-    # ["config/vim/helper.vim"]="$XDG_CONFIG_HOME/vim/helper.vim"
-    # ["config/nvim/init.vim"]="$XDG_CONFIG_HOME/nvim/init.vim"
+    # Vim
+    ["home/vimrc"]="$HOME/.vimrc"
+    ["config/vim/autoload/pathogen.vim"]="$XDG_CONFIG_HOME/vim/autoload/pathogen.vim"
+    ["config/vim/filetype.vim"]="$XDG_CONFIG_HOME/vim/filetype.vim"
+    ["config/vim/plugins.vim"]="$XDG_CONFIG_HOME/vim/plugins.vim"
+    ["config/vim/helper.vim"]="$XDG_CONFIG_HOME/vim/helper.vim"
+    ["config/vim/global_extra_conf.py"]="$XDG_CONFIG_HOME/vim/global_extra_conf.py"
+    ["config/vim/pluginlist"]="$XDG_CONFIG_HOME/vim/pluginlist"
 )
 
 # ---------------------------------------------------------
@@ -144,7 +146,7 @@ do_install() {
 
     # -- Create ~/.cache directory structure
     local XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
-    local cache_dirs=(bash less python node wget vim screen gnupg)
+    local cache_dirs=(bash less python node wget vim vim/info vim/undo screen gnupg)
     for d in "${cache_dirs[@]}"; do
         mkdir -p "$XDG_CACHE_HOME/$d"
     done
@@ -166,6 +168,18 @@ do_install() {
     migrate_file "$HOME/.node_repl_history" "$XDG_CACHE_HOME/node/repl_history"
     migrate_file "$HOME/.wget-hsts"         "$XDG_CACHE_HOME/wget/hsts"
     migrate_file "$HOME/.viminfo"           "$XDG_CACHE_HOME/vim/viminfo"
+
+    echo ""
+
+    # -- Install vim plugins (requires git)
+    local pluginlist="$XDG_CONFIG_HOME/vim/pluginlist"
+    if [ -f "$pluginlist" ] && command -v git &>/dev/null; then
+        echo ""
+        info "installing vim plugins..."
+        bash "$pluginlist"
+    elif [ -f "$pluginlist" ]; then
+        warn "git not found — skipping vim plugin install (run 'bash $pluginlist' later)"
+    fi
 
     echo ""
 

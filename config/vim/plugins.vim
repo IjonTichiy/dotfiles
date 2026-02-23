@@ -33,12 +33,20 @@ call pathogen#helptags()
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Mappings
+" Plugin configuration
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" airline
+"""""""""""""""""""""""""""""""""""""""
+
 
 " bufExplorer
 """""""""""""""""""""""""""""""""""""""
 map <leader>b :BufExplorer<cr>
+let g:bufExplorerDefaultHelp=0
+let g:bufExplorerShowRelativePath=1
+let g:bufExplorerFindActive=1
+let g:bufExplorerSortBy='name'
 
 
 " comfortable-motion
@@ -49,11 +57,17 @@ nnoremap <silent> <C-f> :call comfortable_motion#flick(200)<CR>
 nnoremap <silent> <C-b> :call comfortable_motion#flick(-200)<CR>
 
 
-" Cope (quickfix list navigation)
+" cope (quickfix navigation - built-in)
 """""""""""""""""""""""""""""""""""""""
 map <leader>cn :cn<cr>
 map <leader>cp :cp<cr>
 map <leader>cc :botright cope<cr>
+
+
+" grep (built-in)
+"""""""""""""""""""""""""""""""""""""""
+let Grep_Skip_Dirs = 'RCS CVS SCCS .svn generated'
+set grepprg=/bin/grep\ -nH
 
 
 " NERDTree
@@ -61,38 +75,6 @@ map <leader>cc :botright cope<cr>
 map <leader>nn :NERDTreeToggle<cr>
 map <leader>nf :NERDTreeFind<cr>
 map <leader>nb :NERDTreeFromBookmark<Space>
-
-
-" Tagbar
-"""""""""""""""""""""""""""""""""""""""
-map <leader>nt :TagbarToggle<cr>
-
-
-" yankstack
-"""""""""""""""""""""""""""""""""""""""
-nmap <c-p> <Plug>yankstack_substitute_older_paste
-nmap <c-n> <Plug>yankstack_substitute_newer_paste
-
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Configuration
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-" Airline
-"""""""""""""""""""""""""""""""""""""""
-" (uses defaults — override here if needed)
-
-
-" bufExplorer
-"""""""""""""""""""""""""""""""""""""""
-let g:bufExplorerDefaultHelp=0
-let g:bufExplorerShowRelativePath=1
-let g:bufExplorerFindActive=1
-let g:bufExplorerSortBy='name'
-
-
-" NERDTree
-"""""""""""""""""""""""""""""""""""""""
 let g:NERDTreeShowHidden=1
 let g:NERDTreeBookmarksFile=$HOME . '/.cache/vim/NERDTreeBookmarks'
 let g:NERDTreeIgnore = ['\.pyc$', '__pycache__', '.git']
@@ -111,25 +93,17 @@ let g:netrw_dirhistmax  =10
 let g:netrw_dirhistcnt =1
 
 
-" Tagbar
+" tagbar
 """""""""""""""""""""""""""""""""""""""
+map <leader>nt :TagbarToggle<cr>
 let g:TagbarWinSize=25
 
 
 " yankstack
 """""""""""""""""""""""""""""""""""""""
+nmap <c-p> <Plug>yankstack_substitute_older_paste
+nmap <c-n> <Plug>yankstack_substitute_newer_paste
 let g:yankstack_yank_keys = ['y', 'd']
-
-
-" surround
-"""""""""""""""""""""""""""""""""""""""
-" (uses defaults — mostly cs, ds, ys motions)
-
-
-" Vim grep
-"""""""""""""""""""""""""""""""""""""""
-let Grep_Skip_Dirs = 'RCS CVS SCCS .svn generated'
-set grepprg=/bin/grep\ -nH
 
 
 " YouCompleteMe
