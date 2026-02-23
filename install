@@ -1,0 +1,227 @@
+#!/usr/bin/env bash
+# install — Deploy dotfiles from this repo via symlinks
+# =====================================================
+#
+# Usage:
+#   git clone https://github.com/user/dotfiles
+#   cd dotfiles
+#   ./install
+#
+# What it does:
+#   1. Detects XDG_CONFIG_HOME (defaults to ~/.config)
+#   2. Backs up any existing files that would be overwritten
+#   3. Creates symlinks from this repo into ~ and $XDG_CONFIG_HOME
+#   4. Optionally loads the new config in the current shell
+#
+# To revert:
+#   ./install --uninstall
+#   (restores from backup and removes symlinks)
+
+set -euo pipefail
+
+# ---------------------------------------------------------
+# Config
+# ---------------------------------------------------------
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+BACKUP_DIR="$HOME/.dotfiles_backup/$(date +%Y%m%d_%H%M%S)"
+
+# Color output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+DIM='\033[0;90m'
+RST='\033[0m'
+
+info()  { echo -e "${GREEN}[+]${RST} $*"; }
+warn()  { echo -e "${YELLOW}[!]${RST} $*"; }
+err()   { echo -e "${RED}[✗]${RST} $*"; }
+dim()   { echo -e "${DIM}    $*${RST}"; }
+
+# ---------------------------------------------------------
+# Mapping: repo path  →  install target
+#
+# Add new dotfiles here. The script handles the rest.
+# ---------------------------------------------------------
+declare -A LINKS=(
+    # repo path (relative)             →  target (absolute)
+    ["home/bashrc"]="$HOME/.bashrc"
+    ["home/bash_logout"]="$HOME/.bash_logout"
+    ["home/inputrc"]="$HOME/.inputrc"
+    ["home/screenrc"]="$HOME/.screenrc"
+    ["home/Xresources"]="$HOME/.Xresources"
+    ["config/bash/bash_alias"]="$XDG_CONFIG_HOME/bash/bash_alias"
+    ["config/python/pythonstartup.py"]="$XDG_CONFIG_HOME/python/pythonstartup.py"
+    ["config/wget/wgetrc"]="$XDG_CONFIG_HOME/wget/wgetrc"
+    # Ready for your vim config later:
+    # ["home/vimrc"]="$HOME/.vimrc"
+    # ["config/vim/filetype.vim"]="$XDG_CONFIG_HOME/vim/filetype.vim"
+    # ["config/vim/plugins.vim"]="$XDG_CONFIG_HOME/vim/plugins.vim"
+    # ["config/vim/helper.vim"]="$XDG_CONFIG_HOME/vim/helper.vim"
+    # ["config/nvim/init.vim"]="$XDG_CONFIG_HOME/nvim/init.vim"
+)
+
+# ---------------------------------------------------------
+# Functions
+# ---------------------------------------------------------
+backup_file() {
+    local target="$1"
+    if [ -e "$target" ] || [ -L "$target" ]; then
+        mkdir -p "$BACKUP_DIR"
+        local rel="${target#$HOME/}"
+        local backup_path="$BACKUP_DIR/$rel"
+        mkdir -p "$(dirname "$backup_path")"
+        cp -aL "$target" "$backup_path" 2>/dev/null || cp -a "$target" "$backup_path"
+        dim "backed up → $backup_path"
+    fi
+}
+
+create_link() {
+    local src="$DOTFILES_DIR/$1"
+    local dst="$2"
+
+    if [ ! -f "$src" ]; then
+        warn "source not found, skipping: $1"
+        return
+    fi
+
+    # Back up existing file (only if it's not already our symlink)
+    if [ -e "$dst" ] || [ -L "$dst" ]; then
+        local existing
+        existing="$(readlink -f "$dst" 2>/dev/null || true)"
+        if [ "$existing" = "$(readlink -f "$src")" ]; then
+            dim "already linked: $dst"
+            return
+        fi
+        backup_file "$dst"
+        rm -f "$dst"
+    fi
+
+    mkdir -p "$(dirname "$dst")"
+    ln -s "$src" "$dst"
+    info "$(basename "$dst") → ${CYAN}$src${RST}"
+}
+
+remove_link() {
+    local src="$DOTFILES_DIR/$1"
+    local dst="$2"
+
+    if [ -L "$dst" ]; then
+        local existing
+        existing="$(readlink -f "$dst" 2>/dev/null || true)"
+        if [ "$existing" = "$(readlink -f "$src")" ]; then
+            rm "$dst"
+            info "removed symlink: $dst"
+        fi
+    fi
+}
+
+do_install() {
+    echo ""
+    echo -e "${CYAN}┌──────────────────────────────────────┐${RST}"
+    echo -e "${CYAN}│       dotfiles — install              │${RST}"
+    echo -e "${CYAN}└──────────────────────────────────────┘${RST}"
+    echo ""
+    info "repo:       $DOTFILES_DIR"
+    info "XDG_CONFIG: $XDG_CONFIG_HOME"
+    echo ""
+
+    # -- Symlink dotfiles
+    for src in "${!LINKS[@]}"; do
+        create_link "$src" "${LINKS[$src]}"
+    done
+
+    echo ""
+
+    if [ -d "$BACKUP_DIR" ]; then
+        warn "backups saved to: $BACKUP_DIR"
+    else
+        info "no existing files needed backup"
+    fi
+
+    echo ""
+
+    # -- Create ~/.cache directory structure
+    local XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+    local cache_dirs=(bash less python node wget vim screen gnupg)
+    for d in "${cache_dirs[@]}"; do
+        mkdir -p "$XDG_CACHE_HOME/$d"
+    done
+    chmod 700 "$XDG_CACHE_HOME/gnupg" "$XDG_CACHE_HOME/screen"
+    info "cache dirs created under $XDG_CACHE_HOME"
+
+    # -- Migrate existing history files into ~/.cache
+    migrate_file() {
+        local old="$1" new="$2"
+        if [ -f "$old" ] && [ ! -L "$old" ] && [ ! -f "$new" ]; then
+            mv "$old" "$new"
+            dim "migrated $(basename "$old") → $new"
+        fi
+    }
+
+    migrate_file "$HOME/.bash_history"      "$XDG_CACHE_HOME/bash/history"
+    migrate_file "$HOME/.lesshst"           "$XDG_CACHE_HOME/less/history"
+    migrate_file "$HOME/.python_history"    "$XDG_CACHE_HOME/python/history"
+    migrate_file "$HOME/.node_repl_history" "$XDG_CACHE_HOME/node/repl_history"
+    migrate_file "$HOME/.wget-hsts"         "$XDG_CACHE_HOME/wget/hsts"
+    migrate_file "$HOME/.viminfo"           "$XDG_CACHE_HOME/vim/viminfo"
+
+    echo ""
+
+    # Load Xresources if X is available
+    if command -v xrdb &>/dev/null && [ -n "${DISPLAY:-}" ]; then
+        xrdb -merge "$HOME/.Xresources" && info "Xresources loaded"
+    fi
+
+    info "done! restart your shell or run:  ${CYAN}source ~/.bashrc${RST}"
+    echo ""
+}
+
+do_uninstall() {
+    echo ""
+    echo -e "${YELLOW}┌──────────────────────────────────────┐${RST}"
+    echo -e "${YELLOW}│       dotfiles — uninstall            │${RST}"
+    echo -e "${YELLOW}└──────────────────────────────────────┘${RST}"
+    echo ""
+
+    for src in "${!LINKS[@]}"; do
+        remove_link "$src" "${LINKS[$src]}"
+    done
+
+    # Restore most recent backup if it exists
+    local latest_backup
+    latest_backup="$(ls -1d "$HOME/.dotfiles_backup/"* 2>/dev/null | tail -1 || true)"
+    if [ -n "$latest_backup" ] && [ -d "$latest_backup" ]; then
+        echo ""
+        read -rp "Restore backup from $latest_backup? [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            cp -a "$latest_backup/." "$HOME/"
+            info "backup restored from: $latest_backup"
+        fi
+    fi
+
+    echo ""
+    info "uninstall complete"
+    echo ""
+}
+
+# ---------------------------------------------------------
+# Main
+# ---------------------------------------------------------
+case "${1:-}" in
+    --uninstall|-u)
+        do_uninstall
+        ;;
+    --help|-h)
+        echo "Usage: ./install [OPTIONS]"
+        echo ""
+        echo "Options:"
+        echo "  (none)          Install dotfiles (creates symlinks)"
+        echo "  --uninstall     Remove symlinks and restore backups"
+        echo "  --help          Show this help"
+        ;;
+    *)
+        do_install
+        ;;
+esac

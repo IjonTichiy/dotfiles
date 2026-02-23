@@ -1,0 +1,93 @@
+# ~/.inputrc - Readline configuration
+# ====================================
+
+# -- Meta / unicode support
+set meta-flag on
+set input-meta on
+set convert-meta off
+set output-meta on
+
+# -- Completion improvements
+set colored-stats on
+set colored-completion-prefix on
+set completion-ignore-case on
+set completion-prefix-display-length 3
+set mark-symlinked-directories on
+set show-all-if-ambiguous on
+set show-all-if-unmodified on
+set visible-stats on
+set skip-completed-text on
+
+# -- Bell
+set bell-style visible
+
+$if mode=emacs
+
+    # === General ===
+    "\C-x\C-v":    display-shell-version
+    "\C-x\C-r":    re-read-init-file
+    "\C-x\C-u":    undo
+    "\C-g":         abort
+
+    # === Yank / paste ===
+    "\C-y":         yank
+    "\e.":          insert-last-argument
+    "\e\C-y":       yank-nth-arg
+    "\ey":          yank-pop
+
+    # === Bracketed paste (modern terminals) ===
+    "\e[200~":      bracketed-paste-begin
+
+    # === Search ===
+    "\C-]":         character-search
+    "\e\C-]":       character-search-backward
+
+    # === Accept / execute ===
+    "\C-j":         accept-line
+    "\C-m":         accept-line
+    "\C-x\C-e":    edit-and-execute-command
+
+    # === Deletion ===
+    "\eh":          backward-delete-char
+    "\ew":          backward-kill-word
+    "\eb":          kill-word
+    "\C-k":         kill-line
+
+    # === Case manipulation ===
+    #   Alt+u = upcase word,  Alt+l = downcase word,  Alt+c = capitalize
+    "\eu":          upcase-word
+    "\el":          downcase-word
+    "\ec":          capitalize-word
+
+    # === Line editing ===
+    "\e\\":         delete-horizontal-space
+    "\C-xA":        do-lowercase-version
+    "\C-t":         transpose-chars
+    "\et":          transpose-words
+
+    # === Navigation ===
+    "\C-f":         forward-char
+    "\C-b":         backward-char
+    "\e[1;3C":      forward-word       # Alt+Right
+    "\e[1;3D":      backward-word      # Alt+Left
+    "\ea":          beginning-of-line
+    "\ee":          end-of-line
+
+    # === History ===
+    "\eOB":         next-history
+    "\eOA":         previous-history
+    "\C-n":         history-search-forward
+    "\C-p":         history-search-backward
+
+    "\e\C-i":       dynamic-complete-history
+    "\e^":          history-expand-line
+    "\ek":          alias-expand-line
+
+    "\en":          non-incremental-forward-search-history
+    "\ep":          non-incremental-reverse-search-history
+
+    # === Misc ===
+    "\e-":          digit-argument
+    "\e*":          insert-completions
+
+$endif

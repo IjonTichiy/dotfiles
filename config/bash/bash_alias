@@ -1,0 +1,62 @@
+# ~/.config/bash/bash_alias
+# =========================
+
+# -- Safety nets
+alias sudo='sudo '              # allow aliases after sudo
+alias rm='rm -I'                # confirm before bulk delete
+alias cp='cp -i'
+alias mv='mv -i'
+
+# -- Python
+alias python='python3'
+alias ipython='ipython3'
+alias pip='pip3'
+
+# -- Navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias -- -='cd -'               # "cd -" via just "-"
+
+# -- Listing (use color, human-readable sizes)
+alias ls='ls --color=auto --group-directories-first'
+alias la='ls -A'
+alias ll='ls -lh'
+alias lla='ls -lhA'
+alias lt='ls -lhtr'             # newest last
+
+# -- Grep with color
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+# -- Git
+alias git='git.exe'
+alias git-ls='git ls-tree --full-tree -r --name-only HEAD'
+alias gs='git status -sb'
+alias gd='git diff'
+alias gl='git log --oneline --graph --decorate -20'
+
+# -- Editors
+alias vim='nvim'
+alias vi='nvim'
+
+# -- xterm  (launches in background, uses Xresources config)
+alias xterm='xterm &'
+
+# -- Clipboard (X11)
+alias clipboard='xclip -selection clipboard'
+
+# -- Misc
+alias key='sed -n l'            # show control chars
+alias path='echo $PATH | tr : "\n"'
+alias ports='ss -tulanp'
+alias df='df -h'
+alias du='du -h'
+alias free='free -h'
+alias reload='source ~/.bashrc'
+
+# -- Screen shortcuts
+alias sc='screen'
+alias scl='screen -ls'
+alias scr='screen -r'

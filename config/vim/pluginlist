@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# pluginlist — install vim plugins via pathogen
+# Usage:  cd ~/.config/vim && bash pluginlist
+#
+# Each plugin is cloned into plugins/<name>.vim
+# Pathogen only loads directories ending in .vim
+# To disable a plugin: rename to remove the .vim suffix
+
+PLUGIN_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/vim/plugins"
+mkdir -p "$PLUGIN_DIR"
+
+clone() {
+    local repo="$1"
+    local name="$2"
+    local target="$PLUGIN_DIR/$name.vim"
+    if [ -d "$target" ]; then
+        echo "  skip  $name (already installed)"
+    else
+        echo "  clone $name"
+        git clone --depth 1 "$repo" "$target"
+    fi
+}
+
+echo "Installing vim plugins into $PLUGIN_DIR"
+echo ""
+
+# File navigation
+clone https://github.com/preservim/nerdtree              NERDTree
+clone https://github.com/kien/ctrlp.vim                  ctrlp
+
+# UI
+clone https://github.com/vim-airline/vim-airline          airline
+clone https://github.com/chriskempson/base16-vim          base16-vim
+clone https://github.com/junegunn/goyo.vim                goyo
+clone https://github.com/preservim/tagbar                 tagbar
+
+# Editing
+clone https://github.com/tpope/vim-commentary             commentary
+clone https://github.com/tpope/vim-surround               surround
+clone https://github.com/godlygeek/tabular                tabular
+clone https://github.com/maxbrunsfeld/vim-yankstack       yankstack
+
+# Buffers & scrolling
+clone https://github.com/jlanzarotta/bufexplorer          bufExplorer
+clone https://github.com/yuttie/comfortable-motion.vim    comfortable-motion
+
+# Git / utilities
+clone https://github.com/vim-scripts/netrw.vim            netrw
+
+echo ""
+echo "Done. Restart vim to load new plugins."

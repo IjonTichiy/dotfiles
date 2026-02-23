@@ -1,0 +1,295 @@
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"                                   vimrc
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" The user configuration file for vim.
+"""""""""""""""""""""""""""""""""""""""
+" Contents:
+"
+"           - Mappings
+"           - Configuration
+"           - Plugins
+"           - Colorscheme
+"           - Autocommands
+"           - Abbreviations
+"
+"""""""""""""""""""""""""""""""""""""""
+
+
+" Mappings
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" For easy access to configuration files the <leader>e<X><Y> pattern is used
+" where <X> is the first letter of the config and <Y> a possible subfile.
+"
+"       ee : ~/.vimrc               evf: vim/filetype.vim
+"       evp: vim/plugins.vim        evh: vim/helper.vim
+"       ebb: ~/.bashrc              eba: bash/alias
+"       es : ~/.screenrc
+"       ec : crontab
+"
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" With a map leader it's possible to do extra key combinations
+let mapleader=","
+
+" Configuration interface
+"""""""""""""""""""""""""""""""""""""""
+" Access this file
+nnoremap <leader>ee :e $VIMRC<CR>
+
+" Access the vim helper functions
+nnoremap <leader>evf :e $VIM_FILETYPES<CR>
+
+" Access the vim plugin configuration
+nnoremap <leader>evp :e $VIM_PLUGINS<CR>
+
+" Access the vim helper functions
+nnoremap <leader>evh :e $VIM_HELPERS<CR>
+
+" Access ~/.bashrc
+nnoremap <leader>ebb :e $BASHRC<CR>
+
+" Access local alias definitions
+nnoremap <leader>eba :e $BASH_ALIAS<CR>
+
+" Access cronjobs
+nnoremap <leader>ec :!crontab -e<CR>
+
+" Access gnu-screen configuration
+nnoremap <leader>es :e $SCREENRC<CR>
+
+" Quick scratch pad
+nnoremap <leader>xp :e ~/.cache/python/tmp.py<CR>
+
+
+"""""""""""""""""""""""""""""""""""""""
+" Global
+"""""""""""""""""""""""""""""""""""""""
+" Clipboard support (X11 / xterm via xclip)
+if executable('xclip')
+    xnoremap <silent> "+y y:call system("xclip -selection clipboard", @")<cr>
+    nnoremap <silent> "+p :let @"=substitute(system("xclip -selection clipboard -o"), '<C-v><C-m>', '', 'g')<cr>p
+    nnoremap <silent> "*p :let @"=substitute(system("xclip -selection primary -o"), '<C-v><C-m>', '', 'g')<cr>p
+endif
+
+" Remove the Windows ^M - when the encodings gets messed up
+noremap <leader>m mmHmt:%s/<C-V><cr>//ge<cr>'tzt'm
+
+" Show a list of all sourced files
+noremap <leader>ls :scriptnames<cr>
+
+" Close buffer
+noremap <leader>q :bd<cr>
+
+" Visual block mode (since <C-v> can conflict with paste)
+noremap <leader>v <C-v>
+
+" Fast saving
+nmap <leader>w :w!<cr>
+
+
+"""""""""""""""""""""""""""""""""""""""
+" Normal mode
+"""""""""""""""""""""""""""""""""""""""
+" Reload vimrc
+nmap <leader>r :source $MYVIMRC<CR>
+
+" Move a line of text using ALT+[jk]
+nmap <M-j> mz:m+<cr>`z
+nmap <M-k> mz:m-2<cr>`z
+
+" Switch CWD to the directory of the open buffer
+map <leader>cd :cd %:p:h<cr>:pwd<cr>
+
+" Toggle paste mode on and off
+nmap <leader>pp :setlocal paste!<cr>
+
+" Map <Space> to / (search)
+nmap <space> /
+
+" Map Ctrl-<Space> to ? (backwards search)
+nmap <c-space> ?
+
+" Disable highlight when <leader><cr> is pressed
+nmap <silent> <leader><cr> :noh<cr>
+
+" Smart way to move between windows
+nmap <C-j> <C-W>j
+nmap <C-k> <C-W>k
+nmap <C-h> <C-W>h
+nmap <C-l> <C-W>l
+
+" Tabs
+nmap <leader>tt :tabnew<cr>
+nmap <leader>tn :tabnext<cr>
+nmap <leader>to :tabonly<cr>
+nmap <leader>tc :tabclose<cr>
+nmap <leader>tm :tabmove
+
+
+"""""""""""""""""""""""""""""""""""""""
+" Insert mode
+"""""""""""""""""""""""""""""""""""""""
+" Convenient escape
+imap jj <ESC>
+
+
+"""""""""""""""""""""""""""""""""""""""
+" Command mode
+"""""""""""""""""""""""""""""""""""""""
+" Smart path shortcuts
+cno $h e ~/
+cno $d e ~/Desktop/
+cno $j e ./
+cno $c e <C-\>eCurrentFileDir("e")<cr>
+
+" Delete everything until the last slash
+cno $q <C-\>eDeleteTillSlash()<cr>
+
+
+"""""""""""""""""""""""""""""""""""""""
+" Visual mode
+"""""""""""""""""""""""""""""""""""""""
+" pressing * or # searches for the current selection
+vnoremap <silent> * :<C-u>call VisualSelection('', '')<CR>/<C-R>=@/<CR><CR>
+vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
+
+" Move a line of text using ALT+[jk]
+vmap <M-j> :m'>+<cr>`<my`>mzgv`yo`z
+vmap <M-k> :m'<-2<cr>`>my`<mzgv`yo`z
+
+
+"""""""""""""""""""""""""""""""""""""""
+" Spell checking
+"""""""""""""""""""""""""""""""""""""""
+map <leader>ss :setlocal spell!<cr>
+map <leader>sn ]s
+map <leader>sp [s
+map <leader>sa zg
+map <leader>s? z=
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" >> Configuration
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Environment
+let pluginpath=$XDG_CONFIG_HOME . '/vim/plugins'
+set runtimepath+=~/.config/vim
+
+" Cache files in ~/.cache/vim  (keep ~ clean)
+set viminfo=%,<800,'10,/50,:100,h,f0,n~/.cache/vim/info/viminfo
+set undodir=~/.cache/vim/undo/
+set undofile
+
+set shortmess=at
+set encoding=utf8
+set langmenu=en
+set ffs=unix,dos,mac
+
+" General
+set backspace=eol,start,indent
+set number
+set autoread
+set expandtab
+set smarttab
+set shiftwidth=4
+set tabstop=4
+set lbr
+set ai
+set si
+set nowrap
+set colorcolumn=+1
+
+" Command mode
+set history=1000
+set wildmenu
+set hidden
+set cmdheight=2
+set wildignore=*.o,*~,*.pyc,*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store
+set whichwrap+=<,>,h,l
+
+" Appearance
+set t_Co=256
+set so=12
+set showmatch
+set mat=3
+set noerrorbells
+set novisualbell
+set t_vb=
+
+" Search
+set incsearch
+set ignorecase
+set smartcase
+set hlsearch
+set magic
+
+" Files
+set nobackup
+set nowb
+set noswapfile
+
+" Specify the behavior when switching between buffers
+try
+  set switchbuf=useopen,usetab,newtab
+  set stal=2
+catch
+endtry
+
+" Return to last edit position when opening files
+au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+
+
+"""""""""""""""""""""""""""""""""""""""
+" >> Plugins
+"""""""""""""""""""""""""""""""""""""""
+" Source plugin configuration (also calls pathogen#infect)
+source $VIM_PLUGINS
+
+" Activate filetype detection
+filetype plugin indent on
+
+" Source filetype specific configuration
+source $VIM_FILETYPES
+
+" Source helper functions
+source $VIM_HELPERS
+
+
+"""""""""""""""""""""""""""""""""""""""
+" Colorscheme
+"""""""""""""""""""""""""""""""""""""""
+" IMPORTANT: must come after loading plugins
+syntax enable
+
+" Base16 Atelier Dune - matches the terminal Xresources palette
+if filereadable(expand(pluginpath . '/base16-vim.vim/colors/base16-atelier-dune.vim'))
+    set background=dark
+    colorscheme base16-atelier-dune
+
+    " Ensure visual selection is clearly visible
+    " base02 (#6e6b5e) on dark bg — warm grey band
+    hi Visual ctermbg=19 ctermfg=NONE guibg=#6e6b5e guifg=NONE
+else
+    " Fallback
+    colorscheme industry
+    hi Visual ctermbg=238 ctermfg=NONE
+endif
+
+" Fix background color erase in screen/tmux
+set t_ut=
+
+
+"""""""""""""""""""""""""""""""""""""""
+" Autocommands
+"""""""""""""""""""""""""""""""""""""""
+if has('autocmd')
+    augroup reload_vimrc
+        autocmd!
+        autocmd BufWritePost $MYVIMRC nested source $MYVIMRC
+    augroup end
+endif
+
+
+"""""""""""""""""""""""""""""""""""""""
+" Abbreviations
+"""""""""""""""""""""""""""""""""""""""
+ab xdate <c-r>=strftime("%d/%m/%y %H:%M:%S")<cr>

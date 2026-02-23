@@ -1,0 +1,252 @@
+# ~/.bashrc - Optimized for WSL2 + xterm + screen workflow
+# ========================================================
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
+
+# ---------------------------------------------------------
+# PATH
+# ---------------------------------------------------------
+if ! [[ "$PATH" =~ "$HOME/.local/bin:$HOME/bin:" ]]; then
+    PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+fi
+export PATH
+
+# ---------------------------------------------------------
+# WSLg / X11 display  (WSLg sets this automatically on
+# newer builds, but we guard it for older setups or VcXsrv)
+# ---------------------------------------------------------
+if [ -z "$DISPLAY" ]; then
+    export DISPLAY=:0
+fi
+
+# ---------------------------------------------------------
+# Load Xresources automatically (no more manual xrdb!)
+# Only when we're in an interactive shell and X is available.
+# ---------------------------------------------------------
+if [[ $- == *i* ]] && command -v xrdb &>/dev/null && [ -n "$DISPLAY" ]; then
+    [ -f "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xresources"
+fi
+
+# ---------------------------------------------------------
+# Environment
+# ---------------------------------------------------------
+export LANG=en_US.UTF-8
+# Only set LC_ALL if the locale is actually available on this system.
+# Generate it if missing:  sudo locale-gen en_US.UTF-8
+if locale -a 2>/dev/null | grep -qi 'en_US\.utf.*8'; then
+    export LC_ALL=en_US.UTF-8
+fi
+
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+
+# ---------------------------------------------------------
+# Declutter ~/  —  redirect history & state files to ~/.cache
+# ---------------------------------------------------------
+# Create subdirectories once (no-op if they exist)
+mkdir -p "$XDG_CACHE_HOME"/{bash,less,python,node,wget,vim,screen}
+
+# Bash
+export HISTFILE="$XDG_CACHE_HOME/bash/history"
+
+# Less
+export LESSHISTFILE="$XDG_CACHE_HOME/less/history"
+export LESSHISTSIZE=1000
+
+# Python  (interactive REPL history)
+export PYTHONSTARTUP="$XDG_CONFIG_HOME/python/pythonstartup.py"
+
+# Node.js REPL
+export NODE_REPL_HISTORY="$XDG_CACHE_HOME/node/repl_history"
+
+# Wget
+export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
+alias wget='wget --hsts-file="$XDG_CACHE_HOME/wget/hsts"'
+
+# GnuPG
+export GNUPGHOME="$XDG_CACHE_HOME/gnupg"
+
+# GNU Screen
+export SCREENRC="$HOME/.screenrc"
+export SCREENDIR="$XDG_CACHE_HOME/screen/sockets"
+mkdir -p "$SCREENDIR" && chmod 700 "$SCREENDIR"
+
+# ---------------------------------------------------------
+
+export EDITOR=nvim
+export VISUAL=nvim
+
+export VIMRC=~/.vimrc
+export VIM_FILETYPES=$XDG_CONFIG_HOME/vim/filetype.vim
+export VIM_PLUGINS=$XDG_CONFIG_HOME/vim/plugins.vim
+export VIM_HELPERS=$XDG_CONFIG_HOME/vim/helper.vim
+
+export BASHRC=~/.bashrc
+export BASH_ALIAS=$XDG_CONFIG_HOME/bash/bash_alias
+
+# fix non-KDE desktop
+export QT_QPA_PLATFORMTHEME=qt5ct
+
+# ---------------------------------------------------------
+# Terminal: make sure we advertise 256-color support
+# ---------------------------------------------------------
+if [ "$TERM" = "xterm" ]; then
+    export TERM=xterm-256color
+fi
+
+# ---------------------------------------------------------
+# History  (much improved)
+# ---------------------------------------------------------
+shopt -s histappend          # append, don't overwrite
+shopt -s cmdhist             # multi-line cmds as one entry
+export HISTSIZE=10000        # in-memory history
+export HISTFILESIZE=20000    # on-disk history
+export HISTCONTROL=ignoreboth:erasedups   # no dupes, no leading-space cmds
+export HISTIGNORE="ls:ll:la:cd:pwd:exit:clear:history"
+export HISTTIMEFORMAT="%F %T  "           # timestamp each entry
+
+# Flush history after every command (useful across screen windows)
+PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND; }history -a"
+
+# ---------------------------------------------------------
+# Shell options
+# ---------------------------------------------------------
+shopt -s checkwinsize   # update LINES/COLUMNS after each command
+shopt -s globstar       # ** matches recursively
+shopt -s nocaseglob     # case-insensitive globbing
+shopt -s cdspell        # autocorrect minor typos in cd
+shopt -s dirspell       # autocorrect dir name typos in completion
+shopt -s autocd         # type a dir name to cd into it
+
+# ---------------------------------------------------------
+# Readline / inputrc
+# ---------------------------------------------------------
+[ -f "$HOME/.inputrc" ] && bind -f "$HOME/.inputrc"
+
+# ---------------------------------------------------------
+# Git prompt (works on Ubuntu where git ships git-prompt.sh)
+# ---------------------------------------------------------
+if [ -f /usr/lib/git-core/git-sh-prompt ]; then
+    . /usr/lib/git-core/git-sh-prompt
+elif [ -f /usr/share/git-core/contrib/completion/git-prompt.sh ]; then
+    . /usr/share/git-core/contrib/completion/git-prompt.sh
+fi
+
+export GIT_PS1_SHOWDIRTYSTATE=1        # staged '+', unstaged '*'
+export GIT_PS1_SHOWUNTRACKEDFILES=1    # untracked '%'
+export GIT_PS1_SHOWUPSTREAM="auto"     # '<' behind, '>' ahead
+export GIT_PS1_SHOWSTASHSTATE=1        # '$' something stashed
+
+# ---------------------------------------------------------
+# Prompt  (clean two-line prompt with git branch + venv)
+# Colors keyed to the Atelier Dune palette via ANSI codes:
+#   muted gold path, cyan git branch, green venv
+# ---------------------------------------------------------
+__build_prompt() {
+    local exit_code=$?
+    local RST='\[\e[0m\]'
+    local DIM='\[\e[38;5;243m\]'     # grey for decorations
+    local GOLD='\[\e[38;5;179m\]'    # path
+    local CYAN='\[\e[38;5;109m\]'    # git branch
+    local GREEN='\[\e[38;5;107m\]'   # venv
+    local RED='\[\e[38;5;167m\]'     # error indicator
+
+    PS1=""
+
+    # show virtualenv if active
+    if [ -n "$VIRTUAL_ENV" ]; then
+        PS1+="${GREEN}($(basename "$VIRTUAL_ENV"))${RST} "
+    fi
+
+    # user@host (dimmed – not very useful inside WSL/screen)
+    PS1+="${DIM}\u@\h${RST} "
+
+    # working directory
+    PS1+="${GOLD}\w${RST}"
+
+    # git branch
+    if type __git_ps1 &>/dev/null; then
+        PS1+="${CYAN}\$(__git_ps1 ' (%s)')${RST}"
+    fi
+
+    # newline + prompt char (red if last cmd failed)
+    if [ $exit_code -ne 0 ]; then
+        PS1+="\n${RED}\$${RST} "
+    else
+        PS1+="\n${DIM}\$${RST} "
+    fi
+}
+PROMPT_COMMAND="__build_prompt; ${PROMPT_COMMAND}"
+
+# Prevent venv from prepending its own (venv) – we handle it above
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+
+# ---------------------------------------------------------
+# Aliases  (sourced from external file)
+# ---------------------------------------------------------
+if [ -f "$BASH_ALIAS" ]; then
+    . "$BASH_ALIAS"
+fi
+
+# ---------------------------------------------------------
+# Python virtual-env  (guard: only activate if it exists)
+# ---------------------------------------------------------
+if [ -f "$HOME/.venv/bin/activate" ]; then
+    source "$HOME/.venv/bin/activate"
+fi
+
+# ---------------------------------------------------------
+# NVM  (lazy-loaded, saves ~200 ms startup time)
+# ---------------------------------------------------------
+export NVM_DIR="$HOME/.nvm"
+# Uncomment the block below if you want eager loading:
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+# Lazy-load: nvm/node/npm are only loaded when first called
+_nvm_lazy_load() {
+    unset -f nvm node npm npx 2>/dev/null
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+}
+nvm()  { _nvm_lazy_load; nvm  "$@"; }
+node() { _nvm_lazy_load; node "$@"; }
+npm()  { _nvm_lazy_load; npm  "$@"; }
+npx()  { _nvm_lazy_load; npx  "$@"; }
+
+# ---------------------------------------------------------
+# Convenience functions
+# ---------------------------------------------------------
+
+# Quick directory bookmarks
+export MARKPATH="$HOME/.marks"
+jump()   { cd -P "$MARKPATH/$1" 2>/dev/null || echo "No such mark: $1"; }
+mark()   { mkdir -p "$MARKPATH"; ln -s "$(pwd)" "$MARKPATH/${1:?give a name}"; }
+unmark() { rm -i "$MARKPATH/${1:?give a name}"; }
+marks()  { ls -l "$MARKPATH" | sed 's/  / /g' | cut -d' ' -f9- | sed 's/ -/\t-/'; }
+
+# Extract any archive
+extract() {
+    if [ -f "$1" ]; then
+        case "$1" in
+            *.tar.bz2) tar xjf   "$1" ;;
+            *.tar.gz)  tar xzf   "$1" ;;
+            *.tar.xz)  tar xJf   "$1" ;;
+            *.bz2)     bunzip2   "$1" ;;
+            *.gz)      gunzip    "$1" ;;
+            *.tar)     tar xf    "$1" ;;
+            *.tbz2)    tar xjf   "$1" ;;
+            *.tgz)     tar xzf   "$1" ;;
+            *.zip)     unzip     "$1" ;;
+            *.7z)      7z x      "$1" ;;
+            *)         echo "'$1': unrecognized archive format" ;;
+        esac
+    else
+        echo "'$1' is not a file"
+    fi
+}

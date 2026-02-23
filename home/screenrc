@@ -1,0 +1,61 @@
+# ~/.screenrc - Optimized for xterm + Atelier Dune dark
+# =====================================================
+
+# -- General
+startup_message off
+altscreen on                    # restore screen after vim/less exits
+defbce on                       # background-color-erase
+vbell off                       # no visual bell
+mousetrack on                   # mouse support
+defscrollback 10000             # generous scrollback
+
+# -- Shell
+shell -$SHELL                   # start login shells
+shelltitle '$ |bash'
+
+# -- Encoding
+defutf8 on
+
+# -- Escape key  (your custom: Ctrl+| and ;j)
+escape ^||
+bindkey ";j" command
+
+# -- Navigation: Ctrl+arrows to move between regions
+bindkey "^[[1;5D" focus left
+bindkey "^[[1;5C" focus right
+bindkey "^[[1;5A" focus up
+bindkey "^[[1;5B" focus down
+
+# -- Window switching: F3/F4
+bindkey "^[OR" prev
+bindkey "^[OS" next
+
+# -- Split management
+bind s split                    # override xoff
+bind v split -v                 # vertical split (screen 4.1+)
+bind X remove                   # close region
+
+# -- Resize mode (x to enter, hjkl to resize, any other key to exit)
+bind x eval "command -c rsz"
+bind -c rsz h eval "resize -h -5" "command -c rsz"
+bind -c rsz j eval "resize -v -5" "command -c rsz"
+bind -c rsz k eval "resize -v +5" "command -c rsz"
+bind -c rsz l eval "resize -h +5" "command -c rsz"
+
+# -- Search in scrollback
+bind ' ' /
+
+# -- Toggle status bar (f = focus mode / F = full)
+bind f eval "caption splitonly" "hardstatus ignore"
+bind F eval "caption always"    "hardstatus alwayslastline"
+
+# -- Window numbering starts at 1
+bind c screen 1
+
+# -- Status bar  (Atelier Dune dark–friendly colors)
+#    Green hostname | white window list with red active | blue date/time
+hardstatus alwayslastline
+hardstatus string '%{= kG}[ %{G}%H %{g}][%= %{= kw}%?%-Lw%?%{r}(%{W}%n*%f%t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{B} %m-%d %{W}%c %{g}]'
+
+# -- Caption for splits (only visible when regions are split)
+caption splitonly "%{= kw}%?%-Lw%?%{= rW}%n*%f %t%{-}%?%+Lw%?%?"
