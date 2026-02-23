@@ -100,7 +100,7 @@ nmap <M-k> mz:m-2<cr>`z
 map <leader>cd :cd %:p:h<cr>:pwd<cr>
 
 " Toggle paste mode on and off
-nmap <leader>pt :setlocal paste!<cr>
+nmap <leader>pp :setlocal paste!<cr>
 
 " Map <Space> to / (search)
 nmap <space> /
@@ -259,33 +259,39 @@ source $VIM_HELPERS
 """""""""""""""""""""""""""""""""""""""
 " IMPORTANT: must come after loading plugins
 syntax enable
+set background=dark
 
-" Tell base16-vim to use the terminal palette (colors 0-21 set by Xresources)
-let base16colorspace=256
+" Use vim's default colorscheme — it renders syntax using the terminal's
+" ANSI colors directly (set by Xresources/Tango Dark). No base16 plugin
+" needed; the terminal IS the palette.
+colorscheme default
 
-" Base16 Atelier Dune - matches the terminal Xresources palette
-if filereadable(expand(pluginpath . '/base16-vim.vim/colors/base16-atelier-dune.vim'))
-    set background=dark
-    colorscheme base16-atelier-dune
-else
-    " Fallback
-    colorscheme industry
-endif
-
-" Transparent background — let the terminal paint the background color.
-" This is the key to vim and terminal looking identical.
+" Transparent background — let the terminal paint the background.
+" All ctermfg/ctermbg values reference ANSI color slots set by Xresources.
+"
+"   Tango Dark ANSI mapping:
+"   0  #000000  black        8  #555753  bright black (grey)
+"   1  #cc0000  red          9  #ef2929  bright red
+"   2  #4e9a06  green       10  #8ae234  bright green
+"   3  #c4a000  yellow      11  #fce94f  bright yellow
+"   4  #3465a4  blue        12  #729fcf  bright blue
+"   5  #75507b  purple      13  #ad7fa8  bright purple
+"   6  #06989a  cyan        14  #34e2e2  bright cyan
+"   7  #d3d7cf  white       15  #eeeeec  bright white
+"
 hi Normal       ctermbg=NONE guibg=NONE
 hi NonText      ctermbg=NONE guibg=NONE
 hi EndOfBuffer  ctermbg=NONE guibg=NONE
-hi LineNr       ctermbg=NONE guibg=NONE
-hi CursorLineNr ctermbg=NONE guibg=NONE
+hi LineNr       ctermbg=NONE ctermfg=8    guibg=NONE
+hi CursorLineNr ctermbg=NONE ctermfg=15   guibg=NONE
 hi SignColumn   ctermbg=NONE guibg=NONE
 hi FoldColumn   ctermbg=NONE guibg=NONE
-hi VertSplit    ctermbg=NONE guibg=NONE
-hi ColorColumn  ctermbg=18   guibg=#292824
-hi Visual       ctermbg=237  ctermfg=NONE guibg=#3a3835 guifg=NONE
-hi StatusLine   ctermbg=19   ctermfg=20   guibg=#6e6b5e guifg=#e8e4cf
-hi StatusLineNC ctermbg=18   ctermfg=20   guibg=#292824 guifg=#999580
+hi VertSplit    ctermbg=NONE ctermfg=8    guibg=NONE
+hi ColorColumn  ctermbg=235  guibg=NONE
+hi Visual       ctermbg=8    ctermfg=NONE guibg=NONE guifg=NONE
+hi CursorLine   ctermbg=8    ctermfg=NONE guibg=NONE guifg=NONE cterm=NONE
+hi StatusLine   ctermbg=8    ctermfg=15   guibg=NONE
+hi StatusLineNC ctermbg=0    ctermfg=8    guibg=NONE
 
 " Fix background color erase in screen/tmux
 set t_ut=

@@ -60,7 +60,7 @@ declare -A LINKS=(
     ["config/vim/filetype.vim"]="$XDG_CONFIG_HOME/vim/filetype.vim"
     ["config/vim/plugins.vim"]="$XDG_CONFIG_HOME/vim/plugins.vim"
     ["config/vim/helper.vim"]="$XDG_CONFIG_HOME/vim/helper.vim"
-    ["config/vim/global_extra_conf.py"]="$XDG_CONFIG_HOME/vim/global_extra_conf.py"
+    ["config/python/global_extra_conf.py"]="$XDG_CONFIG_HOME/python/global_extra_conf.py"
     ["config/vim/pluginlist"]="$XDG_CONFIG_HOME/vim/pluginlist"
 )
 

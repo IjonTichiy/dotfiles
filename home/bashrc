@@ -104,10 +104,10 @@ fi
 # ---------------------------------------------------------
 shopt -s histappend          # append, don't overwrite
 shopt -s cmdhist             # multi-line cmds as one entry
-export HISTSIZE=10000        # in-memory history
-export HISTFILESIZE=20000    # on-disk history
+export HISTSIZE=50000        # in-memory history
+export HISTFILESIZE=100000   # on-disk history
 export HISTCONTROL=ignoreboth:erasedups   # no dupes, no leading-space cmds
-export HISTIGNORE="ls:ll:la:cd:pwd:exit:clear:history"
+export HISTIGNORE="ls:ll:la:cd:pwd:exit:clear:history:vim"
 export HISTTIMEFORMAT="%F %T  "           # timestamp each entry
 
 # Flush history after every command (useful across screen windows)

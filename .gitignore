@@ -1,0 +1,32 @@
+# WSL
+*:Zone.Identifier
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editors
+*.swp
+*.swo
+*.swn
+*~
+.vscode/
+.idea/
+tags
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Vim plugins (installed by pluginlist, not tracked)
+config/vim/plugins/
+
+# Local overrides (machine-specific, not tracked)
+home/bashrc.local
+config/bash/bash_alias.local
+
+# Backups created by install script
+*.bak
+*.orig

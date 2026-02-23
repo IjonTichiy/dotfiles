@@ -8,7 +8,6 @@
 " Active plugins:
 "
 "   airline         status bar
-"   base16-vim      colorscheme (matches terminal Xresources)
 "   bufExplorer     access open buffers with <leader>b
 "   comfortable-motion   smooth scrolling with <c-d> & <c-u>
 "   commentary      toggle comments with gc
@@ -20,6 +19,7 @@
 "   tabular         align text with :Tabularize
 "   tagbar          code outline with <leader>nt
 "   yankstack       cycle paste history with <c-p> / <c-n>
+"   YouCompleteMe   semantic completion, goto, diagnostics
 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -118,11 +118,66 @@ let g:yankstack_yank_keys = ['y', 'd']
 
 " YouCompleteMe
 """""""""""""""""""""""""""""""""""""""
-let g:python3_host_prog='/usr/bin/python3'
-let g:ycm_python_interpreter_path = '/usr/bin/python3'
-let g:ycm_python_sys_path = []
+" Python interpreter (always use the WSL system python for ycmd itself)
+let g:ycm_server_python_interpreter = '/usr/bin/python3'
+let g:python3_host_prog = '/usr/bin/python3'
+
+" Global config (handles compile_commands.json discovery, virtualenvs, WSL paths)
+let g:ycm_global_ycm_extra_conf = $XDG_CONFIG_HOME . '/python/global_extra_conf.py'
+let g:ycm_confirm_extra_conf = 0
 let g:ycm_extra_conf_vim_data = [
   \  'g:ycm_python_interpreter_path',
   \  'g:ycm_python_sys_path'
   \]
-let g:ycm_global_ycm_extra_conf = $XDG_CONFIG_HOME . '/vim/global_extra_conf.py'
+let g:ycm_python_interpreter_path = '/usr/bin/python3'
+let g:ycm_python_sys_path = []
+
+" Performance: large repo safety valve
+" Files above this size (in KB) disable YCM automatically
+let g:ycm_disable_for_files_larger_than_kb = 1000
+
+" Don't run YCM on filetypes where it just wastes CPU
+let g:ycm_filetype_blacklist = {
+  \ 'tagbar': 1,
+  \ 'nerdtree': 1,
+  \ 'markdown': 1,
+  \ 'text': 1,
+  \ 'help': 1,
+  \ 'qf': 1,
+  \ 'gitcommit': 1,
+  \}
+
+" Reduce idle re-parsing (default is 2 seconds — raise for large projects)
+let g:ycm_update_diagnostics_in_insert_mode = 0
+
+" Collect identifiers from comments and strings (cheap, useful)
+let g:ycm_collect_identifiers_from_comments_and_strings = 1
+let g:ycm_seed_identifiers_with_syntax = 1
+let g:ycm_complete_in_strings = 1
+
+" GoTo mappings
+nnoremap <leader>gd :YcmCompleter GoToDefinition<CR>
+nnoremap <leader>gr :YcmCompleter GoToReferences<CR>
+nnoremap <leader>gt :YcmCompleter GetType<CR>
+nnoremap <leader>gi :YcmCompleter GoToImplementation<CR>
+nnoremap <leader>gf :YcmCompleter FixIt<CR>
+nnoremap <leader>gk :YcmCompleter GetDoc<CR>
+nnoremap <leader>gs :YcmDiags<CR>
+
+" Toggle YCM on/off for the current buffer (performance escape hatch)
+" Usage:  ,yt  to toggle YCM off when editing in a huge repo
+function! YcmToggle()
+    if !exists('b:ycm_disabled')
+        let b:ycm_disabled = 0
+    endif
+    if b:ycm_disabled
+        let b:ycm_disabled = 0
+        let b:ycm_largefile = 0
+        echo "YCM enabled for this buffer"
+    else
+        let b:ycm_disabled = 1
+        let b:ycm_largefile = 1
+        echo "YCM disabled for this buffer"
+    endif
+endfunction
+nnoremap <leader>yt :call YcmToggle()<CR>
