@@ -62,6 +62,8 @@ declare -A LINKS=(
     ["config/vim/helper.vim"]="$XDG_CONFIG_HOME/vim/helper.vim"
     ["config/python/global_extra_conf.py"]="$XDG_CONFIG_HOME/python/global_extra_conf.py"
     ["config/vim/pluginlist"]="$XDG_CONFIG_HOME/vim/pluginlist"
+    # Neovim (thin shim that sources ~/.vimrc)
+    ["config/nvim/init.vim"]="$XDG_CONFIG_HOME/nvim/init.vim"
 )
 
 # ---------------------------------------------------------
@@ -146,7 +148,7 @@ do_install() {
 
     # -- Create ~/.cache directory structure
     local XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
-    local cache_dirs=(bash less python node wget vim vim/info vim/undo screen gnupg)
+    local cache_dirs=(bash less python node wget vim vim/info vim/undo nvim screen gnupg)
     for d in "${cache_dirs[@]}"; do
         mkdir -p "$XDG_CACHE_HOME/$d"
     done

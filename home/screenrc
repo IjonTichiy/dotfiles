@@ -6,7 +6,8 @@ startup_message off
 altscreen on                    # restore screen after vim/less exits
 defbce on                       # background-color-erase
 vbell off                       # no visual bell
-mousetrack on                   # mouse support
+mousetrack off                  # leave the mouse to the terminal (drag-select, right-click);
+                                # region focus via Ctrl+arrows instead of clicking
 defscrollback 10000             # generous scrollback
 
 # -- Shell
@@ -44,6 +45,10 @@ bind -c rsz l eval "resize -h +5" "command -c rsz"
 
 # -- Search in scrollback
 bind ' ' /
+
+# -- Push screen's copy buffer to the system clipboard  (copy with C-| [ ... then C-| >)
+#    clip.exe on WSL, xclip elsewhere (both land on the Windows clipboard under WSLg)
+bind > eval writebuf "exec sh -c 'cat /tmp/screen-exchange | { command -v clip.exe >/dev/null 2>&1 && clip.exe || xclip -selection clipboard; }; rm -f /tmp/screen-exchange'"
 
 # -- Toggle status bar (f = focus mode / F = full)
 bind f eval "caption splitonly" "hardstatus ignore"

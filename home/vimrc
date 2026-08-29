@@ -175,7 +175,12 @@ let pluginpath=$XDG_CONFIG_HOME . '/vim/plugins'
 set runtimepath+=~/.config/vim
 
 " Cache files in ~/.cache/vim  (keep ~ clean)
-set viminfo=%,<800,'10,/50,:100,h,f0,n~/.cache/vim/info/viminfo
+" nvim's shada format is incompatible with vim's viminfo — keep the files apart
+if has('nvim')
+    set shada=%,<800,'10,/50,:100,h,f0,n~/.cache/nvim/shada
+else
+    set viminfo=%,<800,'10,/50,:100,h,f0,n~/.cache/vim/info/viminfo
+endif
 set undodir=~/.cache/vim/undo/
 set undofile
 
@@ -185,6 +190,10 @@ set langmenu=en
 set ffs=unix,dos,mac
 
 " General
+" Leave the mouse to the terminal for drag-select + ctrl+c/ctrl+v
+" (nvim enables mouse=nvi by default, which makes the terminal forward
+"  clicks to the editor instead of selecting text)
+set mouse=
 set backspace=eol,start,indent
 set number
 set autoread
