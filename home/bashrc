@@ -33,11 +33,15 @@ fi
 # ---------------------------------------------------------
 # Environment
 # ---------------------------------------------------------
-export LANG=en_US.UTF-8
-# Only set LC_ALL if the locale is actually available on this system.
-# Generate it if missing:  sudo locale-gen en_US.UTF-8
+# Locale: use en_US.UTF-8 where it exists, fall back to C.UTF-8 elsewhere.
+# Generate the real one with:  sudo locale-gen en_US.UTF-8
+# (also drop any LC_* that ssh forwarded from a machine that has it)
 if locale -a 2>/dev/null | grep -qi 'en_US\.utf.*8'; then
+    export LANG=en_US.UTF-8
     export LC_ALL=en_US.UTF-8
+else
+    for _lc in ${!LC_*}; do unset "$_lc"; done; unset _lc
+    export LANG=C.UTF-8
 fi
 
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
