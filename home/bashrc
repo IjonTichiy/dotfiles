@@ -133,6 +133,79 @@ shopt -s autocd         # type a dir name to cd into it
 [ -f "$HOME/.inputrc" ] && bind -f "$HOME/.inputrc"
 
 # ---------------------------------------------------------
+# WSL: paste Windows paths as WSL paths  (Ctrl+O)
+#
+# Copy a path on the Windows side (Explorer "Copy as path",
+# editor tab, wherever) and press Ctrl+O:
+#   - if the command line already holds a Windows path
+#     (e.g. pasted raw with Ctrl+V), convert it in place
+#   - otherwise paste the Windows clipboard, converting any
+#     Windows path in it (shell-quoted if needed)
+# Clipboard content that is no Windows path pastes unchanged.
+# ---------------------------------------------------------
+if [[ $- == *i* ]] && { [ -n "$WSL_DISTRO_NAME" ] || [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; }; then
+
+    # The tty driver claims Ctrl+O as its "discard" character and
+    # eats the keypress before readline sees it — release it first.
+    stty discard undef 2>/dev/null
+
+    # "C:\foo bar"  /  C:\foo  /  \\server\share   →   /mnt/c/... form
+    __wsl_convert_path() {
+        local p="${1#\"}"; p="${p%\"}"
+        wslpath -u "$p" 2>/dev/null || printf '%s' "$p"
+    }
+
+    __wsl_paste_path() {
+        # quoted ("C:\..." or "\\...") or bare, backslash-only so URLs
+        # like https:// never match
+        local re='"([A-Za-z]:\\|\\\\)[^"]+"|([A-Za-z]:\\|\\\\)[^[:space:]"]*'
+        local rest="$READLINE_LINE" out="" m conv
+
+        # 1) Windows path(s) already on the line → convert in place
+        if [[ $rest =~ $re ]]; then
+            while [[ $rest =~ $re ]]; do
+                m="${BASH_REMATCH[0]}"
+                printf -v conv '%q' "$(__wsl_convert_path "$m")"
+                out+="${rest%%"$m"*}$conv"
+                rest="${rest#*"$m"}"
+            done
+            READLINE_LINE="$out$rest"
+            READLINE_POINT=${#READLINE_LINE}
+            return
+        fi
+
+        # 2) otherwise paste the Windows clipboard, converted
+        local clip
+        clip="$(powershell.exe -NoProfile -Command \
+            '[Console]::OutputEncoding=[Text.Encoding]::UTF8; Get-Clipboard -Raw' \
+            2>/dev/null | tr -d '\r')"
+        [ -n "$clip" ] || return 0
+
+        # a line per copied file ("Copy as path" on a multi-selection);
+        # forward-slash form (D:/foo) is fine here thanks to the anchor
+        local lre='^"?([A-Za-z]:[\\/]|\\\\)'
+        local line parts=() converted=0
+        while IFS= read -r line; do
+            [ -n "$line" ] || continue
+            if [[ $line =~ $lre ]]; then
+                printf -v conv '%q' "$(__wsl_convert_path "$line")"
+                parts+=("$conv"); converted=1
+            else
+                parts+=("$line")
+            fi
+        done <<< "$clip"
+
+        local text="$clip"                       # plain-paste fallback
+        (( converted )) && text="${parts[*]}"    # converted path(s)
+
+        READLINE_LINE="${READLINE_LINE:0:READLINE_POINT}$text${READLINE_LINE:READLINE_POINT}"
+        READLINE_POINT=$(( READLINE_POINT + ${#text} ))
+    }
+
+    bind -x '"\C-o": __wsl_paste_path'
+fi
+
+# ---------------------------------------------------------
 # Git prompt (works on Ubuntu where git ships git-prompt.sh)
 # ---------------------------------------------------------
 if [ -f /usr/lib/git-core/git-sh-prompt ]; then
